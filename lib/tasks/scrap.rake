@@ -3,21 +3,21 @@ namespace :scrap do
   require 'nokogiri'
   require 'flickraw'
 
-  desc "=======runs in all environments"
-  task :groups_members => :environment do   
+  desc "scrap members from a group ID"
+  task :members_from_a_group => :environment do
     oa = YAML::load(ERB.new(IO.read("#{Rails.root}/config/flickr.yml")).result)
     FlickRaw.api_key = oa["key"]
     FlickRaw.shared_secret=oa["secret"]
     #token = flickr.get_request_token
     #auth_url = flickr.get_authorize_url(token['oauth_token'], :perms => 'delete')
-    flickr.get_access_token("72157641242906225-b1233f29c2209b26", "d1f3f888314cd20e", "119-459-899")
+    flickr.get_access_token("72157641286145863-48e482439babd015", "6c1eb69803017375", "148-745-621")
+
     groups = ["701449@N21","16978849@N00"]
     groups.each do |group|
       data = flickr.groups.members.getList(:group_id => "#{group}")
       data.each do |d|
         member = Member.new()
-        member.nsid = d["nsid"]
-        member.email = d["email"] rescue nil
+        member.nsid = d["nsid"] 
         member.username = d["username"]
         member.realname =  d["realname"]
         member.membertype = d["membertype"]
@@ -25,15 +25,14 @@ namespace :scrap do
       end
 
       pages = data.pages
-      puts "======================total page", pages
+
       page = 2
       while page <= pages
-        puts "======================group_id, page", group, pages
-        data = flickr.groups.members.getList(:group_id => "701449@N21", :page => page + 1)
+        puts "======================running at current page",  page
+        data = flickr.groups.members.getList(:group_id => "#{group}", :page => page)
         data.each do |d|
           member = Member.new()
-          member.nsid = d["nsid"]
-          member.email = d["email"] rescue nil
+          member.nsid = d["nsid"]          
           member.username = d["username"]
           member.realname =  d["realname"]
           member.membertype = d["membertype"]
@@ -46,8 +45,8 @@ namespace :scrap do
     
   end
 
-  desc "++++=======scrapping email"
-  task :member => :environment do
+  desc "scrap email, website"
+  task :scrap_emai_websites => :environment do
     members = Member.all
     members.each do |member|
       doc = Nokogiri::HTML(open("http://www.flickr.com/people/#{member.nsid}"))
@@ -60,6 +59,7 @@ namespace :scrap do
         end
       end
       member.save
+
     end
   end
 end
