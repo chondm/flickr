@@ -43,7 +43,7 @@ namespace :scrap do
       total_page = m.pages
       current_page = 2
       while current_page <= total_page
-        puts "======================running at current page",  current_page
+        puts "fetching at current page",  current_page
         m = flickr.groups.members.getList(:group_id => "#{g}", :page => current_page)
         data.each do |d|
           member = Member.new()
@@ -97,7 +97,7 @@ namespace :scrap do
     while page <= total_pages
       members =  Member.limit(per_page).offset(offset)
       members.each do |member|
-        puts "=======================", member.nsid
+        puts "Fetching user ID", member.nsid
         data  = flickr.people.getGroups(:user_id => member.nsid)
         data.each do |d|
           unless check_group_exist?(d["nsid"])
@@ -125,12 +125,11 @@ namespace :scrap do
       members =  Member.limit(per_page).offset(offset)
       members.each do |member|
         doc = Nokogiri::HTML(open("http://www.flickr.com/people/#{member.nsid}"))
-        puts "=====================user_id", member.id
+        puts "Fetching user ID", member.nsid
         #member.website = doc.css("#a-bit-more-about > dl > dd").search("a[@rel='nofollow me']").first["href"] rescue nil
         member.website = doc.search("a[@rel= 'nofollow me']").first["href"] rescue nil
         content = doc.css("#a-bit-more-about > dl")
-        content.reverse.each do |t|
-          puts "===============text", t.search("dt").text
+        content.reverse.each do |t|          
           if (t.search("dt").text == "Email:")
             member.email = t.search("dd").text.gsub(" [at] ", "@")
             break
@@ -144,8 +143,6 @@ namespace :scrap do
     end
 
   end
-
-
 
 
   def check_member_exist?(nsid)
