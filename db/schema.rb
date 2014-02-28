@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20140220070445) do
+ActiveRecord::Schema.define(:version => 20140219025838) do
 
   create_table "groups", :force => true do |t|
     t.string   "nsid"
@@ -31,12 +31,12 @@ ActiveRecord::Schema.define(:version => 20140220070445) do
   create_table "members", :force => true do |t|
     t.string   "nsid"
     t.string   "username"
-    t.string   "email"
     t.string   "membertype"
     t.string   "realname"
+    t.string   "email"
+    t.string   "website"
     t.datetime "created_at", :null => false
     t.datetime "updated_at", :null => false
-    t.string   "website"
   end
 
 end
