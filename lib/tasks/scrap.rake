@@ -10,110 +10,76 @@ namespace :scrap do
     FlickRaw.shared_secret=oa["secret"]
     #token = flickr.get_request_token
     #auth_url = flickr.get_authorize_url(token['oauth_token'], :perms => 'delete')
-    flickr.get_access_token("72157641645828894-22400f0dc8daf03d", "ec326339fd618aaf", "876-366-551")
+    flickr.get_access_token("72157641684419823-560b0128f8f33b87", "ac8167cfd5210198", "451-218-777")
   end
 
 
-  desc "scrap members from a group ID"
-  task :members_from_a_group => :environment do
-    
+  desc "scrap all members"
+  task :all => :environment do
     intial
+    Rake::Task['scrap:members_from_a_group'].execute
+    Rake::Task['scrap:groups_from_many_members'].execute
+   
+  end
+
+
+
+  desc "scrap members from a group ID"
+  task :members_from_a_group => :environment do    
     groups = ["701449@N21"]#,"16978849@N00"
-
     # Save group
-    groups.each do |g|
-      group_hash = flickr.groups.getInfo(:group_id => "#{g}")
-      group = Group.new
-      group.nsid = group
-      group.name = group_hash["name"]
-      group.total_members = group_hash["members"]
-      group.save
-
-      m = flickr.groups.members.getList(:group_id => "#{g}")
-      m.each do |d|
-        # Save member from a group
-        member = Member.new()
-        member.nsid = m["nsid"]
-        member.username = m["username"]
-        member.realname =  m["realname"]
-        member.membertype = m["membertype"]
-        member.save
+    groups.each do |id|
+      gr = flickr.groups.getInfo(:group_id => "#{id}")
+      # Save first group
+      if !check_group_exist?(id)
+        group = Group.new
+        group.nsid = id
+        group.name = gr["name"]
+        group.total_members = gr["members"]
+        group.save
       end
-
-      total_page = m.pages
-      current_page = 2
-      while current_page <= total_page
-        puts "fetching at current page",  current_page
-        m = flickr.groups.members.getList(:group_id => "#{g}", :page => current_page)
-        data.each do |d|
-          member = Member.new()
-          member.nsid = m["nsid"]
-          member.username = m["username"]
-          member.realname =  m["realname"]
-          member.membertype = m["membertype"]
-          member.save
-        end
-        current_page = current_page + 1
-      end
+      member_from_group_id(id)
     end  
-    
-    #invoke a rake task from another task
-    Rake::Task['scrap:members_from_many_groups'].execute
+  end
+
+
+  desc "scrap groups from a many members"
+  task :groups_from_many_members => :environment do
+    offset = 0
+    current_page = 1
+    per_page = 100
+    total_members = Member.count
+    total_pages = (total_members / 100) + 1
+    while current_page <= total_pages
+      members =  Member.limit(per_page).offset(offset)
+      members.each do |member|
+        group_from_member_id(member.nsid)
+      end
+      offset = offset + per_page
+      current_page = current_page + 1
+    end
   end
 
   desc "scrap members from many groups"
   task :members_from_many_groups => :environment do
     offset = 0
-    page = 1
+    current_page = 1
     per_page = 100
-    total_entries = Group.count
-    total_pages = (total_entries / 100) + 1
-    while page <= total_pages
-      members =  Group.limit(per_page).offset(offset)
-      members.each do |member|
-        data  = flickr.people.getGroups(:user_id => member.nsid)
-        data.each do |d|
-          unless check_group_exist?(d["nsid"])
-            group = Group.new
-            group.nsid = d["nsid"]
-            group.name = d["name"]
-            group.total_members = d["members"]
-            group.members << member
-            group.save
-          end
-        end
+    total_groups = Group.count
+    total_pages = (total_groups / 100) + 1
+    while current_page <= total_pages
+      groups =  Group.limit(per_page).offset(offset)
+      groups.each do |gr|
+        member_from_group_id(gr.nsid)
       end
+      offset = offset + per_page
+      current_page = current_page + 1
     end
   end
 
-  desc "scrap groups from a many members"
-  task :groups_from_many_members => :environment do
-    intial
-    offset = 0
-    page = 1
-    per_page = 100
-    total_entries = Member.count
-    total_pages = (total_entries / 100) + 1
-    while page <= total_pages
-      members =  Member.limit(per_page).offset(offset)
-      members.each do |member|
-        puts "Fetching user ID", member.nsid
-        data  = flickr.people.getGroups(:user_id => member.nsid)
-        data.each do |d|
-          unless check_group_exist?(d["nsid"])
-            group = Group.new
-            group.nsid = d["nsid"]
-            group.name = d["name"]
-            group.total_members = d["members"]
-            group.members << member
-            group.save
-          end
-        end
-      end
-    end
 
-  end
 
+  
   desc "scrap email, website"
   task :info_member => :environment do
     offset = 0
@@ -136,14 +102,69 @@ namespace :scrap do
           end
         end
         member.save
-
       end
       offset = offset + per_page
       page = page + 1
     end
-
   end
 
+  # Scrapping member from a group id
+  def member_from_group_id(group_id)
+    #scrap first page
+    members = flickr.groups.members.getList(:group_id => "#{group_id}")
+    members.each do |m|
+      #store member
+      if !check_member_exist?(m["nsid"])        
+        save_member(m, group_id)
+      end
+    end
+
+    #scrap next page
+    total_pages = members.pages
+    current_page = 2
+    while current_page <= total_pages
+      puts "fetching at current page #{current_page} of group id #{group_id}"
+      members = flickr.groups.members.getList(:group_id => "#{group_id}", :page => current_page)
+      members.each do |m|
+        if !check_member_exist?(m["nsid"])
+          save_member(m, group_id)
+        end
+      end
+      current_page = current_page + 1
+    end
+  end
+
+
+  def save_member(member, group_id)
+    group = Group.find_by_nsid(group_id)
+    mem = Member.new
+    mem.nsid = member["nsid"]
+    mem.username = member["username"]
+    mem.realname =  member["realname"]
+    mem.membertype = member["membertype"]
+    mem.groups << group
+    mem.save
+  end
+
+  def group_from_member_id(member_id)
+    puts "Fetching user ID #{member.nsid}"
+    groups  = flickr.people.getGroups(:user_id => member.nsid)
+    groups.each do |group|
+      if !check_group_exist?(group["nsid"])
+        save_group(group, member_id)
+      end
+    end
+  end
+
+  def save_group(group, member_id)
+    member = Member.find_by_nsid(member_id)
+    gr = Group.new
+    gr.nsid = group["nsid"]
+    gr.name = group["name"]
+    gr.total_members = group["members"]
+    gr.members << member
+    gr.save
+  end
 
   def check_member_exist?(nsid)
     Member.exists?(nsid: nsid)
