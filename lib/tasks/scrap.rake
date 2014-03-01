@@ -10,7 +10,7 @@ namespace :scrap do
     FlickRaw.shared_secret=oa["secret"]
     #token = flickr.get_request_token
     #auth_url = flickr.get_authorize_url(token['oauth_token'], :perms => 'delete')
-    flickr.get_access_token("72157641684419823-560b0128f8f33b87", "ac8167cfd5210198", "451-218-777")
+    flickr.get_access_token("72157641686182513-c26fd60d38fbfa45", "bbc2e430d4d8ba2e", "341-085-785")
   end
 
 
@@ -19,6 +19,7 @@ namespace :scrap do
     intial
     Rake::Task['scrap:members_from_a_group'].execute
     Rake::Task['scrap:groups_from_many_members'].execute
+    Rake::Task['scrap:members_from_many_groups'].execute
    
   end
 
@@ -147,8 +148,8 @@ namespace :scrap do
   end
 
   def group_from_member_id(member_id)
-    puts "Fetching user ID #{member.nsid}"
-    groups  = flickr.people.getGroups(:user_id => member.nsid)
+    puts "Fetching user ID #{member_id}"
+    groups  = flickr.people.getGroups(:user_id => member_id)
     groups.each do |group|
       if !check_group_exist?(group["nsid"])
         save_group(group, member_id)
