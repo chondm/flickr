@@ -22,17 +22,15 @@ ActiveRecord::Schema.define(:version => 20140219025838) do
   end
 
   create_table "groups_members", :force => true do |t|
-    t.integer  "group_id"
-    t.integer  "member_id"
-    t.datetime "created_at", :null => false
-    t.datetime "updated_at", :null => false
+    t.integer "group_id"
+    t.integer "member_id"
   end
 
   create_table "members", :force => true do |t|
     t.string   "nsid"
     t.string   "username"
     t.string   "membertype"
-    t.string   "realname"
+    t.text     "realname"
     t.string   "email"
     t.string   "website"
     t.datetime "created_at", :null => false

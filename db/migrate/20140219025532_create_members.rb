@@ -4,7 +4,7 @@ class CreateMembers < ActiveRecord::Migration
       t.string :nsid
       t.string :username
       t.string :membertype
-      t.string :realname
+      t.text :realname
       t.string :email
       t.string :website
       t.timestamps
