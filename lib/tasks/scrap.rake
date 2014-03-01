@@ -27,7 +27,7 @@ namespace :scrap do
 
   desc "scrap members from a group ID"
   task :members_from_a_group => :environment do    
-    groups = ["701449@N21"]#,"16978849@N00"
+    groups = ["701449@N21", "16978849@N00"]
     # Save group
     groups.each do |id|
       gr = flickr.groups.getInfo(:group_id => "#{id}")
