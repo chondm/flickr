@@ -63,7 +63,7 @@ namespace :scrap do
 
   desc "scrap members from many groups"
   task :members_from_many_groups => :environment do
-    offset = 0
+    offset = 2
     current_page = 1
     per_page = 100
     total_groups = Group.count
