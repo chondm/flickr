@@ -2,7 +2,7 @@ namespace :scrap do
   require 'open-uri'
   require 'nokogiri'
   require 'flickraw'
-
+  require 'net/http'
 
   def intial
     oa = YAML::load(ERB.new(IO.read("#{Rails.root}/config/flickr.yml")).result)
@@ -78,35 +78,47 @@ namespace :scrap do
     end
   end
 
-
-
   
   desc "scrap email, website"
-  task :info_member => :environment do
+  task :member_information => :environment do
     offset = 0
-    page = 1
+    current_page = 1
     per_page = 100
     total_entries = Member.count
     total_pages = (total_entries / 100) + 1
-    while page <= total_pages
+    while current_page <= total_pages
       members =  Member.limit(per_page).offset(offset)
       members.each do |member|
         doc = Nokogiri::HTML(open("http://www.flickr.com/people/#{member.nsid}"))
-        puts "Fetching user ID", member.nsid
+        puts "Fetching email, website, facebook link of user nsid = #{member.nsid}, ID=#{member.id}"
         #member.website = doc.css("#a-bit-more-about > dl > dd").search("a[@rel='nofollow me']").first["href"] rescue nil
         member.website = doc.search("a[@rel= 'nofollow me']").first["href"] rescue nil
         content = doc.css("#a-bit-more-about > dl")
         content.reverse.each do |t|          
           if (t.search("dt").text == "Email:")
-            member.email = t.search("dd").text.gsub(" [at] ", "@")
+            email = t.search("dd").text.gsub(" [at] ", "@")
+            puts "verifying email:#{email}"
+            member.email = email if verify_email(email)
             break
           end
         end
         member.save
       end
       offset = offset + per_page
-      page = page + 1
+      current_page = current_page + 1
     end
+  end
+
+
+
+  def verify_email(email)
+    url = "http://api.verify-email.org/api.php?usr=lensculture&pwd=demo123&check=" + email   
+    uri = URI(url)   
+    http = Net::HTTP.new(uri.host, uri.port)
+    request = Net::HTTP::Get.new(uri.request_uri)
+    response = http.request(request)
+    parsed_response = JSON.parse(response.body)
+    return parsed_response["verify_status"].to_i
   end
 
   # Scrapping member from a group id
