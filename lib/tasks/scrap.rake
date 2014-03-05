@@ -10,7 +10,7 @@ namespace :scrap do
     FlickRaw.shared_secret=oa["secret"]
     #token = flickr.get_request_token
     #auth_url = flickr.get_authorize_url(token['oauth_token'], :perms => 'delete')
-    flickr.get_access_token("72157641796358603-5cbcf7190fcf2a7d", "916f1e54bf91f26f", "808-302-264")
+    flickr.get_access_token("72157641912523674-f4f38355ac188f7c", "b54a9d0e4371b4b6", "996-074-581")
   end
 
 
@@ -91,12 +91,11 @@ namespace :scrap do
       members.each do |member|
         doc = Nokogiri::HTML(open("http://www.flickr.com/people/#{member.nsid}"))
         puts "Fetching email, website, facebook link of user nsid = #{member.nsid}, ID=#{member.id}"
-        #member.website = doc.css("#a-bit-more-about > dl > dd").search("a[@rel='nofollow me']").first["href"] rescue nil
         member.website = doc.search("a[@rel= 'nofollow me']").first["href"] rescue nil
         content = doc.css("#a-bit-more-about > dl")
         content.reverse.each do |t|          
           if (t.search("dt").text == "Email:")
-            email = t.search("dd").text.gsub(" [at] ", "@")
+            email = t.search("dd").text.gsub(" [at] ", "@")            
             puts "verifying email:#{email}"
             member.email = email if verify_email(email)
             break
@@ -118,7 +117,7 @@ namespace :scrap do
     request = Net::HTTP::Get.new(uri.request_uri)
     response = http.request(request)
     parsed_response = JSON.parse(response.body)
-    return parsed_response["verify_status"].to_i
+    return parsed_response["verify_status"].to_i == 1
   end
 
   # Scrapping member from a group id
