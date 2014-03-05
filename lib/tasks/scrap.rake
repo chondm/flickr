@@ -10,7 +10,7 @@ namespace :scrap do
     FlickRaw.shared_secret=oa["secret"]
     #token = flickr.get_request_token
     #auth_url = flickr.get_authorize_url(token['oauth_token'], :perms => 'delete')
-    flickr.get_access_token("72157641912523674-f4f38355ac188f7c", "b54a9d0e4371b4b6", "996-074-581")
+    flickr.get_access_token("72157641912118413-1537065ae5ee42f2", "3a4896f132bb72ee", "176-127-787")
   end
 
 
@@ -71,6 +71,7 @@ namespace :scrap do
     while current_page <= total_pages
       groups =  Group.limit(per_page).offset(offset)
       groups.each do |gr|
+        puts "fetching group ID #{gr.nsid}"
         member_from_group_id(gr.nsid)
       end
       offset = offset + per_page
