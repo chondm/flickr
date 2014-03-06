@@ -92,7 +92,7 @@ namespace :scrap do
       members =  Member.limit(per_page).offset(offset)
       members.each do |member|
         doc = Nokogiri::HTML(open("http://www.flickr.com/people/#{member.nsid}"))
-        puts "Fetching email, website, facebook link of user nsid = #{member.nsid}, ID=#{member.id}"
+        puts "Fetching email, website, facebook link of user nsid = #{member.nsid}, offset #{offset}"
         #member.website = doc.search("a[@rel= 'nofollow me']").first["href"] rescue nil
         content = doc.css("#a-bit-more-about > dl")
         content.reverse.each do |t|          
