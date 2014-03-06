@@ -87,13 +87,13 @@ namespace :scrap do
     current_page = 1
     per_page = 100
     total_entries = Member.count
-    total_pages = (total_entries / 100) + 1
+    total_pages = 3000#(total_entries / 100) + 1
     while current_page <= total_pages
       members =  Member.limit(per_page).offset(offset)
       members.each do |member|
         doc = Nokogiri::HTML(open("http://www.flickr.com/people/#{member.nsid}"))
         puts "Fetching email, website, facebook link of user nsid = #{member.nsid}, ID=#{member.id}"
-        member.website = doc.search("a[@rel= 'nofollow me']").first["href"] rescue nil
+        #member.website = doc.search("a[@rel= 'nofollow me']").first["href"] rescue nil
         content = doc.css("#a-bit-more-about > dl")
         content.reverse.each do |t|          
           if (t.search("dt").text == "Email:")
