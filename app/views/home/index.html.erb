@@ -1,0 +1,5 @@
+Total members: <%= number_with_delimiter(@total_members)%>
+<br/>
+Total groups: <%= number_with_delimiter(@total_groups)%>
+<br/>
+Fetching members of group (nsid: <%= @current_group.nsid%>) at position <%=number_with_delimiter(@current_group.id.to_i)%>
