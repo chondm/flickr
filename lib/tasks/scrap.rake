@@ -143,7 +143,6 @@ namespace :scrap do
       members = flickr.groups.members.getList(:group_id => "#{group_id}", :page => current_page) rescue nil
       if !members.nil?
         members.each do |m|
-          puts "checking and store member #{m["nsid"]}"
           if !check_member_exist?(m["nsid"])
             save_member(m, group_id)
           end
