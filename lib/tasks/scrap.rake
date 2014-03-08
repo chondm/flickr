@@ -10,7 +10,7 @@ namespace :scrap do
     FlickRaw.shared_secret=oa["secret"]
     #token = flickr.get_request_token
     #auth_url = flickr.get_authorize_url(token['oauth_token'], :perms => 'delete')
-    flickr.get_access_token("72157641999131133-99c7bd17594d7187", "c52578b67b7d3b5e", "810-835-533")
+    flickr.get_access_token("72157641945830585-42eedd665fa596f1", "181ddeee3061a221", "339-258-204")
   end
 
 
@@ -64,7 +64,7 @@ namespace :scrap do
   desc "scrap members from many groups"
   task :members_from_many_groups => :environment do
     intial
-    offset = 60
+    offset = 13
     current_page = 1
     per_page = 100
     total_groups = Group.count
@@ -143,7 +143,6 @@ namespace :scrap do
       members = flickr.groups.members.getList(:group_id => "#{group_id}", :page => current_page) rescue nil
       if !members.nil?
         members.each do |m|
-          puts "checking and store member #{m["nsid"]}"
           if !check_member_exist?(m["nsid"])
             save_member(m, group_id)
           end
