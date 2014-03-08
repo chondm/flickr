@@ -10,7 +10,7 @@ namespace :scrap do
     FlickRaw.shared_secret=oa["secret"]
     #token = flickr.get_request_token
     #auth_url = flickr.get_authorize_url(token['oauth_token'], :perms => 'delete')
-    flickr.get_access_token("72157642028309945-5ce16603d820c70f", "1c28273089fb2d5c", "730-218-000")
+    flickr.get_access_token("72157642031005133-046ebaf205697166", "9b70ea28e6872517", "734-449-141")
 
   end
 
@@ -190,7 +190,7 @@ namespace :scrap do
     group = Group.find_by_nsid(group_id)
     member_nsid = member["nsid"]
     if !check_member_exist?(member_nsid)
-      mem = Mem.find_by_nsid(member_nsid)
+      mem = Member.find_by_nsid(member_nsid)
       mem.groups << group
       mem.save
     else
