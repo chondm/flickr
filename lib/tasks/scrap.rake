@@ -11,6 +11,7 @@ namespace :scrap do
     #token = flickr.get_request_token
     #auth_url = flickr.get_authorize_url(token['oauth_token'], :perms => 'delete')
     flickr.get_access_token("72157642028309945-5ce16603d820c70f", "1c28273089fb2d5c", "730-218-000")
+
   end
 
 
@@ -20,26 +21,43 @@ namespace :scrap do
     #Rake::Task['scrap:members_from_a_group'].execute
     Rake::Task['scrap:groups_from_many_members'].execute
     Rake::Task['scrap:members_from_many_groups'].execute
+
   end
 
 
 
   desc "scrap members from a group ID"
-  task :members_from_a_group => :environment do    
-    groups = ["701449@N21", "16978849@N00"]
+  task :members_from_a_group => :environment do
+   # intial
+    #groups = ["34427469792@N01"]
+    # groups = ["701449@N21", "16978849@N00"]
+
     # Save group
-    groups.each do |id|
-      gr = flickr.groups.getInfo(:group_id => "#{id}")
+    #groups.each do |id|
+      #gr = flickr.groups.getInfo(:group_id => "#{id}")
       # Save first group
-      if !check_group_exist?(id)
-        group = Group.new
-        group.nsid = id
-        group.name = gr["name"]
-        group.total_members = gr["members"]
-        group.save
+      #      if !check_group_exist?(id)
+      #        group = Group.new
+      #        group.nsid = id
+      #        group.name = gr["name"]
+      #        group.total_members = gr["members"]
+      #        group.save
+      #      end
+      #member_from_group_id(id)
+      current_page = 925
+      while current_page <= 2039
+        puts "fetching at current page #{current_page} of group id 34427469792@N01"
+        members = flickr.groups.members.getList(:group_id => "34427469792@N01", :page => current_page) rescue nil
+        if !members.nil?
+          members.each do |m|
+            if !check_member_exist?(m["nsid"])
+              save_member(m, "34427469792@N01")
+            end
+          end
+        end
+        current_page = current_page + 1
       end
-      member_from_group_id(id)
-    end  
+    #end
   end
 
 
