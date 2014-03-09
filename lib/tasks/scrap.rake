@@ -10,7 +10,7 @@ namespace :scrap do
     FlickRaw.shared_secret=oa["secret"]
     #token = flickr.get_request_token
     #auth_url = flickr.get_authorize_url(token['oauth_token'], :perms => 'delete')
-    flickr.get_access_token("72157642089528473-23ab9ff89d1b4c15", "d17f58307346ac87", "460-935-037")
+    flickr.get_access_token("72157642101591103-c2471aead5d6093d", "40c56ed4369a4023", "979-414-584")
 
   end
 
@@ -41,6 +41,7 @@ namespace :scrap do
       end
       member_from_group_id(id)
     end
+   
   end
 
 
@@ -64,14 +65,13 @@ namespace :scrap do
   desc "scrap members from many groups"
   task :members_from_many_groups => :environment do
     intial
-    offset = 80
+    offset = 81
     current_page = 1
     per_page = 100
     total_pages = 2670
     while current_page <= total_pages
-      groups =  Group.limit(per_page).order("id").offset(offset)
+      groups = Group.limit(per_page).order("id").offset(offset)
       groups.each do |gr|
-        puts "fetching group ID #{gr.nsid}"
         member_from_group_id(gr.nsid)
       end
       offset = offset + per_page
@@ -90,7 +90,6 @@ namespace :scrap do
     while current_page <= total_pages
       groups =  Group.limit(per_page).order("id").offset(offset)
       groups.each do |gr|
-        puts "fetching group ID #{gr.nsid}"
         member_from_group_id(gr.nsid)
       end
       offset = offset + per_page
@@ -143,25 +142,31 @@ namespace :scrap do
   # Scrapping member from a group id
   def member_from_group_id(group_id)
     #scrap first page
-    members = flickr.groups.members.getList(:group_id => "#{group_id}") rescue nil
-    if !members.nil?
-      members.each do |m|
-        #store member
-        save_member(m, group_id)
-      end
-      #scrap next page
-      total_pages = members.pages
-      current_page = 2
-      while current_page <= total_pages
-        puts "fetching at current page #{current_page} of group id #{group_id}"
-        members = flickr.groups.members.getList(:group_id => "#{group_id}", :page => current_page) rescue nil
-        if !members.nil?
-          members.each do |m|
-            save_member(m, group_id)
-          end
+    begin
+      puts "fetching group ID #{group_id}"
+      members = flickr.groups.members.getList(:group_id => "#{group_id}")
+        members.each do |m|
+          #store member
+          save_member(m, group_id)
         end
-        current_page = current_page + 1
-      end
+        #scrap next page
+        total_pages = members.pages
+        current_page = 2
+        while current_page <= total_pages
+          begin
+          puts "fetching at current page #{current_page} of group id #{group_id}"
+          members = flickr.groups.members.getList(:group_id => "#{group_id}", :page => current_page)
+            members.each do |m|
+              save_member(m, group_id)
+            end
+          rescue => e
+            write_to_log(e)
+            write_to_log("fetching at current page #{current_page} of group id #{group_id}")
+          end
+          current_page = current_page + 1
+        end
+    rescue => e
+      write_to_log(e)
     end
   end
 
@@ -221,4 +226,10 @@ namespace :scrap do
   end
   
 
+  def write_to_log(error)
+    out = File.open("#{Rails.root}/log/flickr.log","a");
+    out << error
+    out << "\n"
+    out.close
+  end
 end
