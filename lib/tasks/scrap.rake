@@ -64,11 +64,6 @@ namespace :scrap do
 
   desc "scrap members from many groups"
   task :members_from_many_groups => :environment do
-    STDOUT.sync = true
-    puts "Starting up"
-
-    trap('TERM') do
-      puts "Ignoring TERM signal - not a good idea"
       intial
       offset = 83
       current_page = 1
@@ -82,8 +77,6 @@ namespace :scrap do
         offset = offset + per_page
         current_page = current_page + 1
       end
-    end
-    
   end
 
   
