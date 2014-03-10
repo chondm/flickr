@@ -8,9 +8,9 @@ namespace :scrap do
     oa = YAML::load(ERB.new(IO.read("#{Rails.root}/config/flickr.yml")).result)
     FlickRaw.api_key = oa["key"]
     FlickRaw.shared_secret=oa["secret"]
-    #token = flickr.get_request_token
-    #auth_url = flickr.get_authorize_url(token['oauth_token'], :perms => 'delete')
-    flickr.get_access_token("72157642102092563-2efd1b9e9b3c61ef", "89a0e601d9f2dc98", "217-568-985")
+    token = flickr.get_request_token
+    auth_url = flickr.get_authorize_url(token['oauth_token'], :perms => 'delete')
+    flickr.get_access_token("72157642159251034-af72f851109e7d7c", "4e935aebe1caa320", "646-394-872")
 
   end
 
@@ -64,19 +64,26 @@ namespace :scrap do
 
   desc "scrap members from many groups"
   task :members_from_many_groups => :environment do
-    intial
-    offset = 81
-    current_page = 1
-    per_page = 100
-    total_pages = 2670
-    while current_page <= total_pages
-      groups = Group.limit(per_page).order("id").offset(offset)
-      groups.each do |gr|
-        member_from_group_id(gr.nsid)
+    STDOUT.sync = true
+    puts "Starting up"
+
+    trap('TERM') do
+      puts "Ignoring TERM signal - not a good idea"
+      intial
+      offset = 83
+      current_page = 1
+      per_page = 100
+      total_pages = 2670
+      while current_page <= total_pages
+        groups = Group.limit(per_page).order("id").offset(offset)
+        groups.each do |gr|
+          member_from_group_id(gr.nsid)
+        end
+        offset = offset + per_page
+        current_page = current_page + 1
       end
-      offset = offset + per_page
-      current_page = current_page + 1
     end
+    
   end
 
   
@@ -102,27 +109,32 @@ namespace :scrap do
   task :member_information => :environment do
     offset = 0
     current_page = 1
-    per_page = 100
-    total_entries = Member.count
-    total_pages = 3000#(total_entries / 100) + 1
+    #per_page = 100
+    #total_entries = Member.count
+    total_pages = 100
     while current_page <= total_pages
-      members =  Member.limit(per_page).order("id").offset(offset)
-      members.each do |member|
-        doc = Nokogiri::HTML(open("http://www.flickr.com/people/#{member.nsid}"))
-        puts "Fetching email, website, facebook link of user nsid = #{member.nsid}, offset #{offset}"
-        member.website = doc.search("a[@rel= 'nofollow me']").first["href"] rescue nil
-        content = doc.css("#a-bit-more-about > dl")
-        content.reverse.each do |t|          
-          if (t.search("dt").text == "Email:")
-            email = t.search("dd").text.gsub(" [at] ", "@")            
-            puts "verifying email:#{email}"
-            member.email = email if verify_email(email)
-            break
+      begin
+        members =  Member.limit(100).order("id").offset(offset)
+        members.each do |member|
+          doc = Nokogiri::HTML(open("http://www.flickr.com/people/#{member.nsid}"))
+          puts "Fetching email, website, facebook link of user nsid = #{member.nsid}, at position #{member.id}"
+          #member.website = doc.search("a[@rel= 'nofollow me']").first["href"] rescue nil
+          content = doc.css("#a-bit-more-about > dl")
+          content.reverse.each do |t|
+            if (t.search("dt").text == "Email:")
+              email = t.search("dd").text.gsub(" [at] ", "@")
+              puts "verifying email:#{email}"
+              member.email = email if verify_email(email)
+              break
+            end
           end
+          member.save
         end
-        member.save
+      rescue => e
+        write_to_email_log(e)
+        write_to_email_log("Fetching email, website, facebook link of user nsid = #{member.nsid}, at position #{member.id}")
       end
-      offset = offset + per_page
+      offset = offset + 100
       current_page = current_page + 1
     end
   end
@@ -130,13 +142,18 @@ namespace :scrap do
 
 
   def verify_email(email)
-    url = "http://api.verify-email.org/api.php?usr=lensculture&pwd=demo123&check=" + email   
-    uri = URI(url)   
-    http = Net::HTTP.new(uri.host, uri.port)
-    request = Net::HTTP::Get.new(uri.request_uri)
-    response = http.request(request)
-    parsed_response = JSON.parse(response.body)
-    return parsed_response["verify_status"].to_i == 1
+    begin
+      url = "http://api.verify-email.org/api.php?usr=lensculture&pwd=demo123&check=" + email
+      uri = URI(url)
+      http = Net::HTTP.new(uri.host, uri.port)
+      request = Net::HTTP::Get.new(uri.request_uri)
+      response = http.request(request)
+      parsed_response = JSON.parse(response.body)
+      return parsed_response["verify_status"].to_i == 1
+    rescue => e
+      write_to_email_log(e)
+      write_to_email_log("verify error at email #{email}")
+    end
   end
 
   # Scrapping member from a group id
@@ -145,26 +162,26 @@ namespace :scrap do
     begin
       puts "fetching group ID #{group_id}"
       members = flickr.groups.members.getList(:group_id => "#{group_id}")
-        members.each do |m|
-          #store member
-          save_member(m, group_id)
-        end
-        #scrap next page
-        total_pages = members.pages
-        current_page = 2
-        while current_page <= total_pages
-          begin
+      members.each do |m|
+        #store member
+        save_member(m, group_id)
+      end
+      #scrap next page
+      total_pages = members.pages
+      current_page = 2
+      while current_page <= total_pages
+        begin
           puts "fetching at current page #{current_page} of group id #{group_id}"
           members = flickr.groups.members.getList(:group_id => "#{group_id}", :page => current_page)
-            members.each do |m|
-              save_member(m, group_id)
-            end
-          rescue => e
-            write_to_log(e)
-            write_to_log("fetching at current page #{current_page} of group id #{group_id}")
+          members.each do |m|
+            save_member(m, group_id)
           end
-          current_page = current_page + 1
+        rescue => e
+          write_to_log(e)
+          write_to_log("fetching at current page #{current_page} of group id #{group_id}")
         end
+        current_page = current_page + 1
+      end
     rescue => e
       write_to_log(e)
     end
@@ -228,6 +245,13 @@ namespace :scrap do
 
   def write_to_log(error)
     out = File.open("#{Rails.root}/log/flickr.log","a");
+    out << error
+    out << "\n"
+    out.close
+  end
+
+  def write_to_email_log(error)
+    out = File.open("#{Rails.root}/log/flickr_email.log","a");
     out << error
     out << "\n"
     out.close
