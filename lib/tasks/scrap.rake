@@ -64,19 +64,19 @@ namespace :scrap do
 
   desc "scrap members from many groups"
   task :members_from_many_groups => :environment do
-      intial
-      offset = 83
-      current_page = 1
-      per_page = 100
-      total_pages = 2670
-      while current_page <= total_pages
-        groups = Group.limit(per_page).order("id").offset(offset)
-        groups.each do |gr|
-          member_from_group_id(gr.nsid)
-        end
-        offset = offset + per_page
-        current_page = current_page + 1
+    intial
+    offset = 83
+    current_page = 1
+    per_page = 100
+    total_pages = 2670
+    while current_page <= total_pages
+      groups = Group.limit(per_page).order("id").offset(offset)
+      groups.each do |gr|
+        member_from_group_id(gr.nsid)
       end
+      offset = offset + per_page
+      current_page = current_page + 1
+    end
   end
 
   
@@ -100,15 +100,15 @@ namespace :scrap do
   
   desc "scrap email, website"
   task :member_information => :environment do
-    offset = 0
+    offset = 2480
     current_page = 1
     #per_page = 100
     #total_entries = Member.count
     total_pages = 100
     while current_page <= total_pages
-      begin
-        members =  Member.limit(100).order("id").offset(offset)
-        members.each do |member|
+      members =  Member.limit(100).order("id").offset(offset)
+      members.each do |member|
+        begin
           doc = Nokogiri::HTML(open("http://www.flickr.com/people/#{member.nsid}"))
           puts "Fetching email, website, facebook link of user nsid = #{member.nsid}, at position #{member.id}"
           #member.website = doc.search("a[@rel= 'nofollow me']").first["href"] rescue nil
@@ -122,11 +122,12 @@ namespace :scrap do
             end
           end
           member.save
+        rescue => e
+          write_to_email_log(e)
+          write_to_email_log("Fetching email, website, facebook link of user nsid = #{member.nsid}, at position #{member.id}")
         end
-      rescue => e
-        write_to_email_log(e)
-        write_to_email_log("Fetching email, website, facebook link of user nsid = #{member.nsid}, at position #{member.id}")
       end
+     
       offset = offset + 100
       current_page = current_page + 1
     end
