@@ -100,11 +100,11 @@ namespace :scrap do
   
   desc "scrap email, website"
   task :member_information => :environment do
-    offset = 2480
-    current_page = 1
+    offset = 12400
+    current_page = 124
     #per_page = 100
     #total_entries = Member.count
-    total_pages = 100
+    total_pages = 5000
     while current_page <= total_pages
       members =  Member.limit(100).order("id").offset(offset)
       members.each do |member|
