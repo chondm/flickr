@@ -10,7 +10,7 @@ namespace :scrap do
     FlickRaw.shared_secret=oa["secret"]
     token = flickr.get_request_token
     auth_url = flickr.get_authorize_url(token['oauth_token'], :perms => 'delete')
-    flickr.get_access_token("72157642231650853-27773d1680f0400b", "6a95dd6136625948", "235-048-221")
+    flickr.get_access_token("72157642240193143-ad26737f95eb44a9", "b2942f1b307071bd", "859-700-123")
 
   end
 
@@ -83,7 +83,7 @@ namespace :scrap do
   desc "scrap members from many groups"
   task :members_from_many_groups_task2 => :environment do
     intial
-    offset = 1061
+    offset = 1066
     current_page = 10
     per_page = 100
     total_pages = 2670
