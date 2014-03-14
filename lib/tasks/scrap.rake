@@ -111,7 +111,7 @@ namespace :scrap do
       members.each do |member|
         begin
           doc = Nokogiri::HTML(open("http://www.flickr.com/people/#{member.nsid}"))
-          puts "Fetching email, website, facebook link of user nsid = #{member.nsid}, at page #{current_page}"
+          puts "Fetching email of user nsid = #{member.nsid}, at page #{current_page}"
           #member.website = doc.search("a[@rel= 'nofollow me']").first["href"] rescue nil
           content = doc.css("#a-bit-more-about > dl")
           content.reverse.each do |t|
