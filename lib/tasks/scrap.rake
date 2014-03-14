@@ -8,9 +8,9 @@ namespace :scrap do
     oa = YAML::load(ERB.new(IO.read("#{Rails.root}/config/flickr.yml")).result)
     FlickRaw.api_key = oa["key"]
     FlickRaw.shared_secret=oa["secret"]
-    token = flickr.get_request_token
-    auth_url = flickr.get_authorize_url(token['oauth_token'], :perms => 'delete')
-    flickr.get_access_token("72157642287652885-ec4f6e57d4f7ede6", "208f79deeff04772", "487-409-241")
+#    token = flickr.get_request_token
+#    auth_url = flickr.get_authorize_url(token['oauth_token'], :perms => 'delete')
+    flickr.get_access_token("72157642329623765-e25ef540707b21c4", "b987069621db34e7", "284-522-908")
 
   end
 
@@ -83,7 +83,7 @@ namespace :scrap do
   desc "scrap members from many groups"
   task :members_from_many_groups_task2 => :environment do
     intial
-    offset = 1066
+    offset = 1069
     current_page = 10
     per_page = 100
     total_pages = 2670
@@ -100,8 +100,8 @@ namespace :scrap do
   
   desc "scrap email, website"
   task :member_information => :environment do
-    offset = 117400
-    current_page = 1174
+    offset = 157500
+    current_page = 1575
     #per_page = 100
     #total_entries = Member.count
     #total members = 500000
@@ -111,7 +111,7 @@ namespace :scrap do
       members.each do |member|
         begin
           doc = Nokogiri::HTML(open("http://www.flickr.com/people/#{member.nsid}"))
-          puts "Fetching email, website, facebook link of user nsid = #{member.nsid}, at position #{member.id}"
+          puts "Fetching email, website, facebook link of user nsid = #{member.nsid}, at page #{current_page}"
           #member.website = doc.search("a[@rel= 'nofollow me']").first["href"] rescue nil
           content = doc.css("#a-bit-more-about > dl")
           content.reverse.each do |t|
