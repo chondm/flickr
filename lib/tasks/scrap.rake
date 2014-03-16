@@ -8,9 +8,9 @@ namespace :scrap do
     oa = YAML::load(ERB.new(IO.read("#{Rails.root}/config/flickr.yml")).result)
     FlickRaw.api_key = oa["key"]
     FlickRaw.shared_secret=oa["secret"]
-#    token = flickr.get_request_token
-#    auth_url = flickr.get_authorize_url(token['oauth_token'], :perms => 'delete')
-    flickr.get_access_token("72157642370035694-efbb88763b756f8b", "7d1e232f7973014e", "598-536-497")
+    token = flickr.get_request_token
+    auth_url = flickr.get_authorize_url(token['oauth_token'], :perms => 'delete')
+    flickr.get_access_token("72157642416154955-11d45e3bc1e26d27", "e965835009e63c97", "266-184-366")
 
   end
 
@@ -42,6 +42,29 @@ namespace :scrap do
       member_from_group_id(id)
     end
    
+  end
+
+
+  desc "scrap members from a group ID"
+  task :members_from_a_group_id => :environment do
+    intial
+    group_id = ["52239733174@N01"]
+    # Save group
+    total_pages = 1701
+    current_page = 1446
+    while current_page <= total_pages
+      begin
+        puts "fetching at current page #{current_page} of group id #{group_id}"
+        members = flickr.groups.members.getList(:group_id => "#{group_id}", :page => current_page)
+        members.each do |m|
+          save_member_exists(m, group_id)
+        end
+      rescue => e
+        write_to_log(e)
+        write_to_log("fetching at current page #{current_page} of group id #{group_id}")
+      end
+      current_page = current_page + 1
+    end
   end
 
 
@@ -190,6 +213,7 @@ namespace :scrap do
       mem = Member.find_by_nsid(member_nsid)
       mem.groups << group
       mem.save
+      
     else
       mem = Member.new
       mem.nsid = member_nsid
@@ -199,56 +223,80 @@ namespace :scrap do
       mem.groups << group
       mem.save
     end
-  end
 
-  def group_from_member_id(member_id)
-    puts "Fetching user ID #{member_id}"
-    groups  = flickr.people.getGroups(:user_id => member_id) rescue nil
-    if !groups.nil?
-      groups.each do |group|
-        save_group(group, member_id)
+
+    def save_member_exists(member, group_id)
+      group = Group.find_by_nsid(group_id)
+      member_nsid = member["nsid"]
+      if check_member_exist?(member_nsid)
+        if !check_member_exists_in_group?(group, member_nsid)
+          mem = Member.find_by_nsid(member_nsid)
+          mem.groups << group
+          mem.save
+        end
+      else
+        mem = Member.new
+        mem.nsid = member_nsid
+        mem.username = member["username"]
+        mem.realname =  member["realname"]
+        mem.membertype = member["membertype"]
+        mem.groups << group
+        mem.save
       end
     end
-  end
 
-  def save_group(group, member_id)
-    member = Member.find_by_nsid(member_id)
-    group_nsid = group["nsid"]
-    if check_group_exist?(group_nsid)
-      gr = Group.find_by_nsid(group_nsid)
-      gr.members << member
-      gr.save
-    else
-      gr = Group.new
-      gr.nsid = group_nsid
-      gr.name = group["name"]
-      gr.total_members = group["members"]
-      gr.members << member
-      gr.save
+    def group_from_member_id(member_id)
+      puts "Fetching user ID #{member_id}"
+      groups  = flickr.people.getGroups(:user_id => member_id) rescue nil
+      if !groups.nil?
+        groups.each do |group|
+          save_group(group, member_id)
+        end
+      end
     end
 
-  end
+    def save_group(group, member_id)
+      member = Member.find_by_nsid(member_id)
+      group_nsid = group["nsid"]
+      if check_group_exist?(group_nsid)
+        gr = Group.find_by_nsid(group_nsid)
+        gr.members << member
+        gr.save
+      else
+        gr = Group.new
+        gr.nsid = group_nsid
+        gr.name = group["name"]
+        gr.total_members = group["members"]
+        gr.members << member
+        gr.save
+      end
 
-  def check_member_exist?(nsid)
-    Member.exists?(nsid: nsid)
-  end
+    end
 
-  def check_group_exist?(nsid)
-    Group.exists?(nsid: nsid)
-  end
+    def check_member_exist?(nsid)
+      Member.exists?(nsid: nsid)
+    end
+
+    def check_member_exists_in_group?(group, nsid)
+      group.members.exists?(nsid: nsid)
+    end
+
+    def check_group_exist?(nsid)
+      Group.exists?(nsid: nsid)
+    end
   
 
-  def write_to_log(error)
-    out = File.open("#{Rails.root}/log/flickr.log","a");
-    out << error
-    out << "\n"
-    out.close
-  end
+    def write_to_log(error)
+      out = File.open("#{Rails.root}/log/flickr.log","a");
+      out << error
+      out << "\n"
+      out.close
+    end
 
-  def write_to_email_log(error)
-    out = File.open("#{Rails.root}/log/flickr_email.log","a");
-    out << error
-    out << "\n"
-    out.close
+    def write_to_email_log(error)
+      out = File.open("#{Rails.root}/log/flickr_email.log","a");
+      out << error
+      out << "\n"
+      out.close
+    end
   end
-end
