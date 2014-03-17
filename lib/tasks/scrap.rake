@@ -10,7 +10,7 @@ namespace :scrap do
     FlickRaw.shared_secret=oa["secret"]
     token = flickr.get_request_token
     auth_url = flickr.get_authorize_url(token['oauth_token'], :perms => 'delete')
-    flickr.get_access_token("72157642476877345-553f9c5a3af01087", "23110e4f53f6d92d", "677-576-670")
+    flickr.get_access_token("72157642479563993-cc0d5020aac9a9d3", "eabdca6dc63f5979", "406-026-856")
 
   end
 
