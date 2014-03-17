@@ -123,8 +123,8 @@ namespace :scrap do
   
   desc "scrap email, website"
   task :member_information => :environment do
-    offset = 242500
-    current_page = 2425
+    offset = 284400
+    current_page = 2844
     #per_page = 100
     #total_entries = Member.count
     #total members = 500000
