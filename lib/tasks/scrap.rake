@@ -10,7 +10,7 @@ namespace :scrap do
     FlickRaw.shared_secret=oa["secret"]
     token = flickr.get_request_token
     auth_url = flickr.get_authorize_url(token['oauth_token'], :perms => 'delete')
-    flickr.get_access_token("72157642521052575-dd5a1b1853b17b11", "4f0af0a9f64681cc", "999-495-885")
+    flickr.get_access_token("72157642523974484-5b2fbf9a169ea812", "7d6160749e0d4119", "404-269-083")
 
   end
 
@@ -27,18 +27,19 @@ namespace :scrap do
 
   desc "scrap members from a group ID"
   task :members_from_a_group => :environment do
-    groups = ["701449@N21", "16978849@N00"]
+    intial
+    groups = ["35468135891@N01", "94761711@N00", "48111895@N00"]
     # Save group
     groups.each do |id|
-      gr = flickr.groups.getInfo(:group_id => "#{id}")
+      #gr = flickr.groups.getInfo(:group_id => "#{id}")
       # Save first group
-      if !check_group_exist?(id)
-        group = Group.new
-        group.nsid = id
-        group.name = gr["name"]
-        group.total_members = gr["members"]
-        group.save
-      end
+#      if !check_group_exist?(id)
+#        group = Group.new
+#        group.nsid = id
+#        group.name = gr["name"]
+#        group.total_members = gr["members"]
+#        group.save
+#      end
       member_from_group_id(id)
     end
    
