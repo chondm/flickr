@@ -8,9 +8,11 @@ namespace :scrap do
     oa = YAML::load(ERB.new(IO.read("#{Rails.root}/config/flickr.yml")).result)
     FlickRaw.api_key = oa["key"]
     FlickRaw.shared_secret=oa["secret"]
-    token = flickr.get_request_token
-    auth_url = flickr.get_authorize_url(token['oauth_token'], :perms => 'delete')
+#    token = flickr.get_request_token
+#    auth_url = flickr.get_authorize_url(token['oauth_token'], :perms => 'delete')
+
     flickr.get_access_token("72157642801756475-f12fcce67f3ef119", "6dbe5f8fd7c70bcc", "362-303-813")
+
 
   end
 
@@ -49,10 +51,12 @@ namespace :scrap do
   desc "scrap members from a group ID"
   task :members_from_a_group_id => :environment do
     intial
+
     group_id = "52253782@N00"
     # Save group
     total_pages = 329
     current_page = 26
+
     while current_page <= total_pages
       begin
         puts "fetching at current page #{current_page} of group id #{group_id}"
@@ -89,7 +93,7 @@ namespace :scrap do
   desc "scrap members from many groups"
   task :members_from_many_groups => :environment do
     intial
-    offset = 130
+    offset = 139
     current_page = 2
     per_page = 100
     total_pages = 2670  
@@ -124,8 +128,10 @@ namespace :scrap do
   
   desc "scrap email, website"
   task :member_information => :environment do
+
     offset = 485500
     current_page = 4855
+
     #per_page = 100
     #total_entries = Member.count
     #total members = 500000
