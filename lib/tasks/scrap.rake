@@ -8,10 +8,10 @@ namespace :scrap do
     oa = YAML::load(ERB.new(IO.read("#{Rails.root}/config/flickr.yml")).result)
     FlickRaw.api_key = oa["key"]
     FlickRaw.shared_secret=oa["secret"]
-#    token = flickr.get_request_token
-#    auth_url = flickr.get_authorize_url(token['oauth_token'], :perms => 'delete')
+    token = flickr.get_request_token
+    auth_url = flickr.get_authorize_url(token['oauth_token'], :perms => 'delete')
 
-    flickr.get_access_token("72157642804457973-44ef5f0c7dedd5bb", "61a3d57b5c4fa186", "908-034-115")
+    flickr.get_access_token("72157642839364154-1bd8a6a957f39646", "9496f514dd2327f9", "701-960-456")
 
 
   end
@@ -52,10 +52,10 @@ namespace :scrap do
   task :members_from_a_group_id => :environment do
     intial
 
-    group_id = "52253782@N00"
+    group_id = "93724179@N00"
     # Save group
-    total_pages = 329
-    current_page = 26
+    total_pages = 48
+    current_page = 32
 
     while current_page <= total_pages
       begin
