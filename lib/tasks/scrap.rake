@@ -11,7 +11,7 @@ namespace :scrap do
 #    token = flickr.get_request_token
 #    auth_url = flickr.get_authorize_url(token['oauth_token'], :perms => 'delete')
 
-    flickr.get_access_token("72157642889335855-e5e886b2a8c3c5e4", "cb0b4d550a826aa3", "840-915-259")
+    flickr.get_access_token("72157642892110374-b277a1d08dfaae69", "fc1eb3c6f73bbf82", "242-493-644")
 
 
   end
@@ -30,9 +30,9 @@ namespace :scrap do
   desc "scrap members from a group ID"
   task :members_from_a_group => :environment do
     intial
-    groups = ["38514992@N00"]
+    #groups = ["38514992@N00"]
     # Save group
-    groups.each do |id|
+    #groups.each do |id|
       #gr = flickr.groups.getInfo(:group_id => "#{id}")
       # Save first group
 #      if !check_group_exist?(id)
@@ -42,8 +42,8 @@ namespace :scrap do
 #        group.total_members = gr["members"]
 #        group.save
 #      end
-      member_from_group_id(id)
-    end
+      member_from_group_id("38514992@N00")
+    #end
    
   end
 
