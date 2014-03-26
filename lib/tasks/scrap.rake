@@ -11,7 +11,7 @@ namespace :scrap do
     token = flickr.get_request_token
     auth_url = flickr.get_authorize_url(token['oauth_token'], :perms => 'delete')
 
-    flickr.get_access_token("72157642954299125-9140379adb64cdad", "5b3ae9a6ee99d598", "485-843-790")
+    flickr.get_access_token("72157642957018223-54e888cfb2600100", "091caef46d683baa", "610-836-838")
 
 
   end
@@ -51,10 +51,10 @@ namespace :scrap do
   desc "scrap members from a group ID"
   task :members_from_a_group_id => :environment do
     intial
-    group_id = "97947309@N00"
+    group_id = "19126019@N00"
     # Save group
-    total_pages = 171
-    current_page = 85
+    total_pages = 224
+    current_page = 153
 
     while current_page <= total_pages
       begin
@@ -110,7 +110,7 @@ namespace :scrap do
   desc "scrap members from many groups"
   task :members_from_many_groups_task2 => :environment do
     intial
-    offset = 1130
+    offset = 1142
     current_page = 12
     per_page = 100
     total_pages = 2670
