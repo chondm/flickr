@@ -51,10 +51,10 @@ namespace :scrap do
   desc "scrap members from a group ID"
   task :members_from_a_group_id => :environment do
     intial
-    group_id = "47643757@N00"
+    group_id = "97947309@N00"
     # Save group
-    total_pages = 581
-    current_page = 207
+    total_pages = 171
+    current_page = 85
 
     while current_page <= total_pages
       begin
@@ -128,8 +128,8 @@ namespace :scrap do
   desc "scrap email, website"
   task :member_information => :environment do
 
-    offset = 530200
-    current_page = 5302
+    offset = 571300
+    current_page = 5713
 
     #per_page = 100
     #total_entries = Member.count
