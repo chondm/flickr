@@ -8,10 +8,10 @@ namespace :scrap do
     oa = YAML::load(ERB.new(IO.read("#{Rails.root}/config/flickr.yml")).result)
     FlickRaw.api_key = oa["key"]
     FlickRaw.shared_secret=oa["secret"]
-#    token = flickr.get_request_token
-#    auth_url = flickr.get_authorize_url(token['oauth_token'], :perms => 'delete')
+    token = flickr.get_request_token
+    auth_url = flickr.get_authorize_url(token['oauth_token'], :perms => 'delete')
 
-    flickr.get_access_token("72157642892110374-b277a1d08dfaae69", "fc1eb3c6f73bbf82", "242-493-644")
+    flickr.get_access_token("72157642953836165-9e911a2514228b4a", "455a78101631fe91", "965-273-429")
 
 
   end
