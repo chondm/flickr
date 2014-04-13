@@ -11,7 +11,7 @@ namespace :scrap do
     token = flickr.get_request_token
     auth_url = flickr.get_authorize_url(token['oauth_token'], :perms => 'delete')
 
-    flickr.get_access_token("72157643902775063-e5ec9a2cbb2276c7", "f07125856d5f402a", "401-865-704")
+    flickr.get_access_token("72157643902327814-7b9b9a7f1b6a8b09", "457d13d4960c350c", "787-854-974")
 
 
   end
