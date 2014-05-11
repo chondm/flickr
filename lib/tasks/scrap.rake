@@ -89,7 +89,7 @@ namespace :scrap do
   desc "scrap members from many groups"
   task :members_from_many_groups => :environment do
     intial
-    offset = 458
+    offset = 462
     current_page = 5
     per_page = 100
     total_pages = 2670  
