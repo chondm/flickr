@@ -10,7 +10,7 @@ namespace :scrap do
     FlickRaw.shared_secret=oa["secret"]
     token = flickr.get_request_token
     auth_url = flickr.get_authorize_url(token['oauth_token'], :perms => 'delete')
-    flickr.get_access_token("72157644205857969-cd7059cf3af89d43", "f83f32c224167389", "228-500-971")
+    flickr.get_access_token("72157644627525102-7338521df7f32718", "2698fe9ef308bcb4", "322-008-189")
   end
 
 
@@ -51,7 +51,7 @@ namespace :scrap do
     group_id = "13378274@N00"
     # Save group
     total_pages = 945
-    current_page = 505
+    current_page = 785
 
     while current_page <= total_pages
       begin
@@ -124,8 +124,8 @@ namespace :scrap do
   
   desc "scrap email, website"
   task :member_information => :environment do
-    offset = 1358003
-    current_page = 13580
+    offset = 1401530
+    current_page = 14016
     #per_page = 100
     #total_entries = Member.count
     #total members = 500000
